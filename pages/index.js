@@ -52,11 +52,11 @@ export default function Home() {
   const [file, setFile] = useContext(FileContext);
 
   const config = {
-    bucketName: "freelance-project-1-bucket",
+    bucketName: process.env.NEXT_PUBLIC_AWS_BUCKET,
     dirName: "pdfs",
-    region: "ap-south-1",
-    accessKeyId: "AKIAYOFF7FFAJRUIMBQM",
-    secretAccessKey: "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",
+    region: process.env.NEXT_PUBLIC_AWS_REGION,
+    accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY,
+    secretAccessKey: process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY,
     /* optional */
   };
 
