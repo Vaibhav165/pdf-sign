@@ -1,20 +1,40 @@
-import crypto from "crypto";
+// import * as crypto from "crypto";
+let crypto;
+try {
+  crypto = require("node:crypto");
+} catch (err) {
+  console.log("crypto support is disabled!");
+}
 
 export default function handler(req, res) {
-  const { publickey, privatekey } = crypto.generateKeyPairSync("rsa", {
-    modulusLength: 2048,
+  //   const { publickey, privatekey } = crypto.generateKeyPairSync("rsa", {
+  //     modulusLength: 2048,
+  //     publicKeyEncoding: {
+  //       type: "spki",
+  //       format: "der",
+  //     },
+  //     privateKeyEncoding: {
+  //       type: "pkcs8",
+  //       format: "der",
+  //     },
+  //   });
+
+  const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 4096,
     publicKeyEncoding: {
       type: "spki",
-      format: "der",
+      format: "pem",
     },
     privateKeyEncoding: {
       type: "pkcs8",
-      format: "der",
+      format: "pem",
+      cipher: "aes-256-cbc",
+      passphrase: "top secret",
     },
   });
 
   res.send({
-    publickey: publickey.toString("base64"),
-    privatekey: privatekey.toString(" base64"),
+    publickey: publicKey.toString("base64"),
+    privatekey: privateKey.toString(" base64"),
   });
 }

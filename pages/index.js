@@ -4,6 +4,8 @@ import styles from "../styles/Home.module.css";
 import Link from "next/link";
 import { Fragment, useState, useEffect, useRef, useContext } from "react";
 
+import axios, * as others from "axios";
+
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -16,6 +18,8 @@ import Typography from "@mui/material/Typography";
 import FileContext from "../src/Context/FileContext";
 
 import NavBar from "../components/NavBar";
+
+import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 // ** Third Party Imports
 import { useDropzone } from "react-dropzone";
@@ -80,15 +84,52 @@ export default function Home() {
 
   const handleChange = (e) => {
     setSelectedFile(e.target.files[0]);
-    console.log("uploaded");
+    console.log("uploaded", e.target.files);
 
     S3Client.uploadFile(e.target.files[0])
       .then((data) => {
         console.log(data);
         setFile(data);
+        // writeToDoc(data);
       })
       .catch((err) => console.error(err));
+
+    if (file) {
+      console.log("file", file);
+    }
   };
+
+  // const onChange = async (formData) => {
+  //   const config = {
+  //     headers: { "content-type": "multipart/form-data" },
+  //     onUploadProgress: (event) => {
+  //       console.log(
+  //         `Current progress:`,
+  //         Math.round((event.loaded * 100) / event.total)
+  //       );
+  //     },
+  //   };
+
+  //   // const response = await axios.post("/api/file", formData, config);
+  //   axios({
+  //     method: "POST",
+  //     url: "/api/file3",
+  //     formData,
+  //     config: {
+  //       headers: {
+  //         "content-type": "multipart/form-data",
+  //       },
+  //     },
+  //   })
+  //     .then((res) => {
+  //       console.log(res);
+  //     })
+  //     .catch((err) => {
+  //       throw err;
+  //     });
+
+  //   // console.log("response", response.data);
+  // };
 
   const handleLinkClick = (event) => {
     event.preventDefault();
@@ -109,6 +150,60 @@ export default function Home() {
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
+  }
+
+  const [keys, setKeys] = useState(null);
+
+  async function writeToDoc(data) {
+    // const url =
+    //   "https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf";
+    const url = file.location;
+    const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
+
+    // Load a PDFDocument from the existing PDF bytes
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    // Embed the Helvetica font
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Get the first page of the document
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    // Get the width and height of the first page
+    const { width, height } = firstPage.getSize();
+
+    // Draw a string of text diagonally across the first page
+    firstPage.drawText(data.publickey, {
+      x: 5,
+      y: height / 2 + 300,
+      size: 5,
+      font: helveticaFont,
+      color: rgb(0.95, 0.1, 0.1),
+      rotate: degrees(0),
+    });
+
+    // Serialize the PDFDocument to bytes (a Uint8Array)
+    const pdfBytes = await pdfDoc.save();
+
+    // Trigger the browser to download the PDF document
+    let blb = new Blob([pdfBytes], { type: "application/pdf" });
+    let link = window.URL.createObjectURL(blb);
+    window.open(link, "_blank");
+    // download(pdfBytes, "pdf-lib_modification_example.pdf");
+  }
+
+  async function signDOC() {
+    fetch("/api/generateKeys")
+      .then((res) => res.json())
+      .then((res) => {
+        console.log("res", res);
+        setKeys(res);
+        console.log("keys", keys);
+        if (file) {
+          writeToDoc(res);
+        }
+      });
   }
 
   return (
@@ -143,6 +238,16 @@ export default function Home() {
 
                     <Grid item xs={12} md={12}>
                       <input type="file" onChange={handleChange} />
+                      {/* <form
+                        action="/api/file3"
+                        enctype="multipart/form-data"
+                        method="POST"
+                      >
+                        <span>Upload Profile Picture:</span>
+                        <input type="file" name="mypic" required /> <br />
+                        <input type="submit" value="submit" />
+                      </form> */}
+
                       {/* <Box
                         {...getRootProps({ className: "dropzone" })}
                         sx={acceptedFiles.length ? { height: 450 } : {}}
@@ -200,10 +305,12 @@ export default function Home() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   {file ? (
-                    <Link href="sign">
-                      <Button variant="contained">Sign it</Button>
-                    </Link>
-                  ) : null}
+                    // <Link href="sign">
+                    <Button onClick={signDOC} variant="contained">
+                      Sign and download it
+                    </Button>
+                  ) : // </Link>
+                  null}
                 </Grid>
               </Grid>
             </Grid>
