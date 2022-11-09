@@ -16,21 +16,41 @@ export const config = {
 const verifySign = (doc, pdfBuffer, res) => {
   const details = doc[0];
 
-  let { publicKey, digitalSign } = details;
+  let { digitalSign, privateKey, ID, signedPdfString } = details;
 
   // let publickey = crypto.createPublickey({
   //   key: publicKey,
   //   type: "spki",
-  //   format: "der",
   // });
-  let publickey = crypto.createPublicKey(publicKey);
 
-  const verify = crypto.createVerify("SHA256");
-  verify.update(pdfBuffer);
-  verify.end();
-  let result = verify.verify(publickey, Buffer.from(digitalSign, "base64"));
+  var buf;
+  if (pdfBuffer.toString("base64") === signedPdfString) {
+    buf = Buffer.from(signedPdfString);
+  }
 
-  res.status(200).send({ verify: result });
+  let privatekey = crypto.createPrivateKey(privateKey);
+  // const sign = crypto.sign("SHA256", pdfBuffer, privatekey);
+
+  const signer = crypto.createSign("RSA-SHA256");
+  signer.write(buf);
+  signer.end();
+
+  // Returns the signature in output_format which can be 'binary', 'hex' or 'base64'
+  const signature = signer.sign(privatekey, "base64");
+
+  if (signature === digitalSign) {
+    console.log(true);
+    res.status(200).send({ verify: true });
+  } else {
+    res.status(200).send({ verify: false });
+    console.log(false);
+  }
+
+  // const verify = crypto.createVerify("SHA256");
+  // verify.update(buf);
+  // verify.end();
+  // let result = verify.verify(publickey, Buffer.from(digitalSign, "base64"));
+  // console.log(result);
 };
 
 const getDoc = async (id, pdfBuffer, res) => {
@@ -41,7 +61,11 @@ const getDoc = async (id, pdfBuffer, res) => {
   //   console.log(e);
   // }
 
-  verifySign(doc, pdfBuffer, res);
+  if (doc.length) {
+    verifySign(doc, pdfBuffer, res);
+  } else {
+    res.send({ message: "Pdf not Found" });
+  }
 };
 
 const verify = async (req, res) => {
@@ -54,6 +78,7 @@ const verify = async (req, res) => {
 
 const saveFile = async (file, res) => {
   const data = fs.readFileSync(file.filepath);
+  // console.log(data);
   fs.readFile(file.filepath, (err, pdfBuffer) => {
     new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
       if (err) console.error("error:", err);
@@ -76,9 +101,9 @@ export default (req, res) => {
   req.method === "POST"
     ? verify(req, res)
     : req.method === "PUT"
-    ? console.log("PUT")
+    ? res.status(404).json({ message: "Request HTTP Method Incorrect." })
     : req.method === "DELETE"
-    ? console.log("DELETE")
+    ? res.status(404).json({ message: "Request HTTP Method Incorrect." })
     : req.method === "GET"
     ? res.send("Request HTTP Method invalid")
     : res.status(404).send("");
