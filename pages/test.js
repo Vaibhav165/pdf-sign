@@ -32,14 +32,13 @@ function Test() {
     fetch("/api/complete2", {
       method: "POST",
       body: JSON.stringify({
-        some: "hi",
         url: "https://africau.edu/images/default/sample.pdf",
       }),
     })
       .then((res) => res.json())
       .then((res) => {
         console.log(res);
-        base64toPDF(res.str);
+        base64toPDF(res.finalPdfString);
         // let link = window.URL.createObjectURL(b64toBlob(res.str));
         // window.open(link, "_blank");
       });
