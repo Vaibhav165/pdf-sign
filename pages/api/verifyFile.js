@@ -88,7 +88,7 @@ const saveFile = async (file, res) => {
           getDoc(item.text, data, res);
           // console.log(item.text);
         } else {
-          res.send({ message: "Pdf not Found" });
+          // res.send({ message: "Pdf not Found" });
         }
       }
     });
