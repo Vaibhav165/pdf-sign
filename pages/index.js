@@ -86,50 +86,18 @@ export default function Home() {
     setSelectedFile(e.target.files[0]);
     console.log("uploaded", e.target.files);
 
-    S3Client.uploadFile(e.target.files[0])
-      .then((data) => {
-        console.log(data);
-        setFile(data);
-        // writeToDoc(data);
-      })
-      .catch((err) => console.error(err));
+    // S3Client.uploadFile(e.target.files[0])
+    //   .then((data) => {
+    //     console.log(data);
+    //     setFile(data);
+    //     // writeToDoc(data);
+    //   })
+    //   .catch((err) => console.error(err));
 
     if (file) {
       console.log("file", file);
     }
   };
-
-  // const onChange = async (formData) => {
-  //   const config = {
-  //     headers: { "content-type": "multipart/form-data" },
-  //     onUploadProgress: (event) => {
-  //       console.log(
-  //         `Current progress:`,
-  //         Math.round((event.loaded * 100) / event.total)
-  //       );
-  //     },
-  //   };
-
-  //   // const response = await axios.post("/api/file", formData, config);
-  //   axios({
-  //     method: "POST",
-  //     url: "/api/file3",
-  //     formData,
-  //     config: {
-  //       headers: {
-  //         "content-type": "multipart/form-data",
-  //       },
-  //     },
-  //   })
-  //     .then((res) => {
-  //       console.log(res);
-  //     })
-  //     .catch((err) => {
-  //       throw err;
-  //     });
-
-  //   // console.log("response", response.data);
-  // };
 
   const handleLinkClick = (event) => {
     event.preventDefault();
@@ -155,9 +123,9 @@ export default function Home() {
   const [keys, setKeys] = useState(null);
 
   async function writeToDoc(data) {
-    // const url =
-    //   "https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf";
-    const url = file.location;
+    const url =
+      "https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf";
+    // const url = file.location;
     const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
 
     // Load a PDFDocument from the existing PDF bytes
