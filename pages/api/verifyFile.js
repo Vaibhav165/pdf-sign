@@ -47,7 +47,7 @@ const verifySign = (doc, pdfBuffer, res) => {
     console.log(false);
   }
 
-  // const verify = crypto.createVerify("SHA256");
+  // const verify = crypto.createVerify("SHA256");`
   // verify.update(buf);
   // verify.end();
   // let result = verify.verify(publickey, Buffer.from(digitalSign, "base64"));
@@ -75,10 +75,10 @@ const verify = async (req, res) => {
   //   await saveFile(files.file, res);
   //   // return res.status(201).send("");
   // });
-  // const url = JSON.parse(req.body).url;
-  const url = req.body.url;
-  // const name = JSON.parse(req.body).name;
-  const name = req.body.name;
+  const url = JSON.parse(req.body).url;
+  // const url = req.body.url;
+  const name = JSON.parse(req.body).name;
+  // const name = req.body.name;
 
   const dl = new DownloaderHelper(url, "public/", { fileName: `${name}.pdf` });
   dl.on("end", () => {
