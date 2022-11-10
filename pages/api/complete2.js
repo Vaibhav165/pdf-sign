@@ -5,6 +5,7 @@ import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { v4 as uuidv4 } from "uuid";
 import connectDB from "../../utils/connectDB";
 import PdfDetails from "../../models/PdfDetailsModel";
+import { Blob } from "buffer";
 
 // export const config = {
 //   api: {
@@ -126,8 +127,8 @@ const signFile = async (req, res) => {
   privateKey = generateKeys().privatekey;
   //   console.log("Private Key: ", privateKey, publicKey);
   console.log(req.body);
-  // const url = JSON.parse(req.body).url;
-  const url = req.body.url;
+  const url = JSON.parse(req.body).url;
+  // const url = req.body.url;
   let fileBuffer = writeKey(url, publicKey, privateKey, res);
 
   // res.status(200).send(fileBuffer);
