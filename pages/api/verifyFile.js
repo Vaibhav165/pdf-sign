@@ -80,12 +80,12 @@ const verify = async (req, res) => {
   const name = JSON.parse(req.body).name;
   // const name = req.body.name;
 
-  const dl = new DownloaderHelper(url, "public/", { fileName: `${name}.pdf` });
+  const dl = new DownloaderHelper(url, "/", { fileName: `${name}.pdf` });
   dl.on("end", () => {
     console.log("Download Completed");
     // const dat = fs.readFileSync("public/sample.pdf");
     // console.log(dat);
-    const data = fs.readFileSync(`public/${name}.pdf`);
+    const data = fs.readFileSync(`/${name}.pdf`);
     fs.readFile(`public/${name}.pdf`, (err, pdfBuffer) => {
       new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
         if (err) console.error("error:", err);
