@@ -43,10 +43,53 @@ function Test() {
         // window.open(link, "_blank");
       });
   };
+
+  const [url, setUrl] = useState();
+  const [name, setName] = useState();
+
+  const verifyHandler = () => {
+    fetch("/api/verifyFile", {
+      method: "POST",
+      body: JSON.stringify({
+        url: "https://firebasestorage.googleapis.com/v0/b/pdf-sign-5b2d8.appspot.com/o/file.pdf?alt=media&token=a93cdf8c-004b-4f53-bc7f-2bfec928fe04",
+        name: "file",
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => console.log(res));
+  };
+  // const verifyHandler = () => {
+  //   if (name && url) {
+  //     console.log(name, url);
+  //     fetch("/api/verifyFile", {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         url: url,
+  //         name: name,
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((res) => console.log(res));
+  //   }
+  // };
   useEffect(() => {}, []);
   return (
     <div>
-      <button onClick={handler}>do</button>
+      <button onClick={handler}>Sign</button>
+
+      {/* <input
+        type="text"
+        placeholder="url"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      /> */}
+      <button onClick={verifyHandler}>Verify</button>
     </div>
   );
 }

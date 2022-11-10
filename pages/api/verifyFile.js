@@ -3,15 +3,16 @@ import connectDB from "../../utils/connectDB";
 import PdfDetails from "../../models/PdfDetailsModel";
 import formidable from "formidable";
 import fs from "fs";
+const { DownloaderHelper } = require("node-downloader-helper");
 const { PdfReader } = require("pdfreader");
 
 const pdf = require("pdf-parse");
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 const verifySign = (doc, pdfBuffer, res) => {
   const details = doc[0];
@@ -69,33 +70,48 @@ const getDoc = async (id, pdfBuffer, res) => {
 };
 
 const verify = async (req, res) => {
-  const form = new formidable.IncomingForm();
-  form.parse(req, async function (err, fields, files) {
-    await saveFile(files.file, res);
-    // return res.status(201).send("");
-  });
-};
+  // const form = new formidable.IncomingForm();
+  // form.parse(req, async function (err, fields, files) {
+  //   await saveFile(files.file, res);
+  //   // return res.status(201).send("");
+  // });
+  // const url = JSON.parse(req.body).url;
+  const url = req.body.url;
+  // const name = JSON.parse(req.body).name;
+  const name = req.body.name;
 
-const saveFile = async (file, res) => {
-  const data = fs.readFileSync(file.filepath);
-  // console.log(data);
-  fs.readFile(file.filepath, (err, pdfBuffer) => {
-    new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
-      if (err) console.error("error:", err);
-      else if (!item) console.warn("end of buffer");
-      else if (item.text) {
-        if (item.text.includes("ID")) {
-          getDoc(item.text, data, res);
-          // console.log(item.text);
-        } else {
-          // res.send({ message: "Pdf not Found" });
+  const dl = new DownloaderHelper(url, "public/", { fileName: `${name}.pdf` });
+  dl.on("end", () => {
+    console.log("Download Completed");
+    // const dat = fs.readFileSync("public/sample.pdf");
+    // console.log(dat);
+    const data = fs.readFileSync(`public/${name}.pdf`);
+    fs.readFile(`public/${name}.pdf`, (err, pdfBuffer) => {
+      new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
+        if (err) console.error("error:", err);
+        else if (!item) console.warn("end of buffer");
+        else if (item.text) {
+          if (item.text.includes("ID")) {
+            getDoc(item.text, data, res);
+            // console.log(item.text);
+          } else {
+            // res.send({ message: "Pdf not Found" });
+          }
         }
-      }
+      });
     });
   });
+  dl.on("error", (err) => console.log("Download Failed", err));
+  dl.start().catch((err) => console.error(err));
+  saveFile(url, name, res);
+};
 
-  fs.writeFileSync(`./public/${file.name}`, data);
-  await fs.unlinkSync(file.filepath);
+const saveFile = async (url, name, res) => {
+  // const data = fs.readFileSync(file.filepath);
+  console.log(url, name);
+
+  // fs.writeFileSync(`./public/${file.name}`, data);
+  // await fs.unlinkSync(file.filepath);
   return;
 };
 
