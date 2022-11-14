@@ -13,10 +13,52 @@ export default function Upload(props) {
     }
   };
 
-  const uploadToServer = async (event) => {
+  function base64toPDF(data) {
+    var bufferArray = base64ToArrayBuffer(data);
+    var blobStore = new Blob([bufferArray], { type: "application/pdf" });
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blobStore);
+      return;
+    }
+    var data = window.URL.createObjectURL(blobStore);
+    var link = document.createElement("a");
+    document.body.appendChild(link);
+    link.href = data;
+    link.download = "file.pdf";
+    link.click();
+    window.URL.revokeObjectURL(data);
+    link.remove();
+  }
+
+  function base64ToArrayBuffer(data) {
+    var bString = window.atob(data);
+    var bLength = bString.length;
+    var bytes = new Uint8Array(bLength);
+    for (var i = 0; i < bLength; i++) {
+      var ascii = bString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    return bytes;
+  }
+
+  const signHandler = async (event) => {
     const body = new FormData();
     body.append("file", image);
-    fetch("/api/verifyFile", {
+    fetch("/api/complete3", {
+      method: "POST",
+      body,
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        base64toPDF(res.finalPdfString);
+      });
+  };
+
+  const verifyHandler = async (event) => {
+    const body = new FormData();
+    body.append("file", image);
+    fetch("/api/verifyFile2", {
       method: "POST",
       body,
     })
@@ -33,9 +75,12 @@ export default function Upload(props) {
         <button
           className="btn btn-primary"
           type="submit"
-          onClick={uploadToServer}
+          onClick={verifyHandler}
         >
-          Send to server
+          verify it
+        </button>
+        <button className="btn btn-primary" type="submit" onClick={signHandler}>
+          sign it
         </button>
       </div>
     </div>

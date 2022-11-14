@@ -48,7 +48,7 @@ function Test() {
   const [name, setName] = useState();
 
   const verifyHandler = () => {
-    fetch("/api/verifyFile", {
+    fetch("/api/verifyFile2", {
       method: "POST",
       body: JSON.stringify({
         url: "https://firebasestorage.googleapis.com/v0/b/pdf-sign-5b2d8.appspot.com/o/file.pdf?alt=media&token=a93cdf8c-004b-4f53-bc7f-2bfec928fe04",

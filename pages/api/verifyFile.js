@@ -86,7 +86,7 @@ const verify = async (req, res) => {
     // const dat = fs.readFileSync("public/sample.pdf");
     // console.log(dat);
     const data = fs.readFileSync(`uploads/${name}.pdf`);
-    fs.readFile(`public/${name}.pdf`, (err, pdfBuffer) => {
+    fs.readFile(`uploads/${name}.pdf`, (err, pdfBuffer) => {
       new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
         if (err) console.error("error:", err);
         else if (!item) console.warn("end of buffer");
